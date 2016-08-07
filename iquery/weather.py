@@ -49,6 +49,7 @@ class WeatherCollection():
     def preety_print(self):
         pt = prettytable.PrettyTable(header=False)
         pt.add_row(TABLE_HEADER) 
+
         for fc in self.forecasts():
             pt.add_row(fc)
         print(pt)
