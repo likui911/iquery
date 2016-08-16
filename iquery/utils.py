@@ -17,42 +17,35 @@ requests.packages.urllib3.disable_warnings(SNIMissingWarning)
 
 NETWORK_CONNECTION_FAILED = 'Network connection failed.'
 
+USER_AGENTS = (
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0',
+    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0',
+    'Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0',
+    ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) '
+        'Chrome/19.0.1084.46 Safari/536.5'),
+    ('Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46'
+        'Safari/536.5')
+)
+
 def exit_after_echo(promt):
     print(promt)
     sys.exit(1)
 
 
 def requests_get(url, **kwargs):
-    USER_AGENTS = (
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0',
-        'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0',
-        'Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0',
-        ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) '
-         'Chrome/19.0.1084.46 Safari/536.5'),
-        ('Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46'
-         'Safari/536.5')
-    )
-    
+
     try:
         r = requests.get(
             url,
             headers={'User-Agent': random.choice(USER_AGENTS)}, **kwargs
         )
-    except ConnectionError:
+    except ConnectionError as e:
         exit_after_echo(NETWORK_CONNECTION_FAILED)
    
     return r
 
 def request_post(url,data,**kwargs):
-    USER_AGENTS = (
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0',
-        'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0',
-        'Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0',
-        ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) '
-         'Chrome/19.0.1084.46 Safari/536.5'),
-        ('Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46'
-         'Safari/536.5')
-    )
+
     try:
         r = requests.post(
             url,
@@ -108,6 +101,11 @@ class Args():
             return arg[1:]
         return ''
 
+    def is_asking_help(self):
+        if self.get(0)=='-h'or self.get(0)=='-help':
+            return True
+        return False
+
     def is_querying_weather(self):
         '''args长度为2并且以-w开始为天气查询的请求'''
         if self._argc != 2:
@@ -116,6 +114,12 @@ class Args():
             return False
         return True
 
+    def is_querying_movie(self):
+        if self.get(0)!='-m':
+            return False
+        if self._argc !=2:
+            return False
+        return True
 
     def is_querying_train(self):
         '''根据args的长度和关键字判断是否是列车查询'''

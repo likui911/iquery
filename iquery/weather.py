@@ -37,10 +37,10 @@ class WeatherCollection():
             offset = _date -datetime.today()
  
             if offset.days in range(-1,6):
-                forecast = (date,# 日期
+                forecast = (date[5:],# 日期
                             self.wea_parse(fc.get('wea')),# 天气
-                            colored.green(str(fc.get('low'))),# 最低气温
-                            colored.red(str(fc.get('high'))),# 最高气温
+                            str(fc.get('low')),# 最低气温
+                            str(fc.get('high')),# 最高气温
                             fc.get('ftv'),# 节气
                     )
                 yield forecast

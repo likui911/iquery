@@ -22,6 +22,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="iquery\movie.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="iquery\weather.py">
       <SubType>Code</SubType>
     </Compile>
@@ -44,10 +47,12 @@
     <Folder Include="iquery\datas\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="iquery\datas\cities.dat" />
     <Content Include="iquery\datas\citycodes.dat" />
     <Content Include="iquery\datas\stations.dat">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="README.md" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
