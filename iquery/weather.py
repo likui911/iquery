@@ -80,9 +80,6 @@ class WeatherForecastQuery():
         forecast = r.json()
 
         return WeatherCollection(forecast)
-        
-   
-            
 
 def query(city):
     return WeatherForecastQuery(city).query()

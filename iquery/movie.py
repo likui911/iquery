@@ -17,10 +17,13 @@ sys.setrecursionlimit(50000)
 
 GEWALA_URL = 'http://www.gewara.com/'
 SEARCH_MOVIE_URL = 'http://www.gewara.com/movie/searchMovie.xhtml'
-SEARCH_MOVIE_DETAIL = 'http://www.gewara.com/movie/%d'
+SEARCH_MOVIE_DETAIL = 'http://www.gewara.com/movie/%s'
 
 CITY_NOT_FOUND = 'city not found '
 QUERY_FAILED = 'query failed '
+END_PAGE_OF_QUERY = 'it\'s already the last page'
+BEGIN_PAGE_OF_QUERY = 'it\'s already the first page'
+ID_NOT_FOUND = 'the movie id not found'
 MOVIE_HEADER = ('序号','片名','评分','类型','语言','导演')
 
 
@@ -37,16 +40,17 @@ class GewalaCollection():
         return requests_get(GEWALA_URL+ self.city).cookies
 
     def next(self):
-        if self.idx <len(self.urls):
+        if self.idx <len(self.urls)-1:
             self.idx += 1
             return self.query_page(self.urls[self.idx])
 
     def prev(self):
-        if self.idx >1:
+        if self.idx >0:
             self.idx -= 1
             return self.query_page(self.urls[self.idx])
 
     def query_page(self,url=None):
+     
         if not url:
             url = self.urls[self.idx]
         # todo 查询当前页面内容，并打印
@@ -78,6 +82,7 @@ class GewalaCollection():
                 (movie_id,movie_string,movie_grade,movie_style,movie_lang,movie_command))
 
         self.print_hotmovies(movies)
+        return True
 
     def print_hotmovies(self,movies):
         pt = PrettyTable(header=False)
@@ -91,14 +96,17 @@ class GewalaCollection():
         except MemoryError:
             exit_after_echo(QUERY_FAILED)
 
-    def print_moviedetail(self):
-        pass
-
     def query_detail(self,id):
         url = SEARCH_MOVIE_DETAIL%id
         r = requests.get(url,cookies = self.cookie)
-        soup = BeautifulSoup(r.text,'html.parser')
-        # todo 解析电影详情
+        try:
+            soup = BeautifulSoup(r.text,'html.parser')
+        
+            txt = soup.find_all('div',onclick="openPoint('ui_movieInfoBox');")[0]
+            print(txt.p.contents[0])
+            return True
+        except:
+            return False
 
     def get_pages(self):
         r= requests_get(SEARCH_MOVIE_URL,cookies = self.cookie)
@@ -124,6 +132,14 @@ class GewalaCollection():
         return urls
         
 def query(city):
+    '''
+    命令:
+        <id>            输入电影编号查看详情
+        N/n             下一页
+        P/p             上一页
+        ！q              退 出
+        H/h             帮助 
+    '''
        
     file_path = os.path.join(os.path.dirname(__file__),'datas','cities.dat')
     with open(file_path,'r')as fp:
@@ -134,13 +150,21 @@ def query(city):
   
     gewala = GewalaCollection(cities[city])
     gewala.query_page()
-    gewala.next()
-    gewala.next()
-    gewala.query_detail(306098174)
-   
+    print(query.__doc__)
 
-# todo 可以持续的输入参数
-# todo !Q/q 退出
-# todo 输入编号 查看电影详情:E/e 返回电影查询界面
-# todo N/n 查看下一页  P/p查看上一页
-# todo H/h 查看帮助
+    while(True):
+        # todo 这里做一些验证
+        command = input('>')
+        if command == '!q':
+            exit_after_echo('---')
+        elif command =='n' or command =='N':
+            if not gewala.next():
+                print(END_PAGE_OF_QUERY)
+        elif command == 'p' or command == 'P':
+            if not gewala.prev():
+                print(BEGIN_PAGE_OF_QUERY)
+        elif command =='h' or command == 'H':
+            print(query.__doc__)
+        else:
+            if not gewala.query_detail(command):
+                print(ID_NOT_FOUND)
